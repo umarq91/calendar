@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npx -y shadcn@latest init -y --base-color zinc)",
+      "Bash(npx -y shadcn@latest init --help)",
+      "Bash(npx -y shadcn@latest init -d -y -b radix)",
+      "Bash(npx -y shadcn@latest add input label card alert sonner dropdown-menu separator -y)",
+      "Bash(npm view *)",
+      "Bash(npx tsc *)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 NEXT_PUBLIC_SUPABASE_ANON_KEY=stub NEXT_PUBLIC_APP_URL=http://localhost:3000 SUPABASE_SERVICE_ROLE_KEY=stub npx next build)",
+      "Bash(npx eslint *)",
+      "Bash(echo \"tsc:$?\")",
+      "Bash(echo \"lint:$?\")"
+    ]
+  }
+}
