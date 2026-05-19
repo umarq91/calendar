@@ -25,3 +25,20 @@ export async function countSmtpConfigs(): Promise<number> {
   if (error) throw error;
   return count ?? 0;
 }
+
+/**
+ * Server-only: return the user's default SMTP config (no password).
+ * Falls back to the most-recently-created config if no default is set.
+ */
+export async function getDefaultSmtpForCurrentUser(): Promise<SmtpConfig | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('smtp_configs')
+    .select('*')
+    .order('is_default', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}

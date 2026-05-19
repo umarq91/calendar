@@ -46,12 +46,17 @@ export default async function DashboardPage() {
                 ? 'You can manage connections in Settings.'
                 : 'InviteWave sends through your own SMTP server. Add one to start sending.'}
             </p>
-            <div className="mt-8 flex items-center gap-4">
+            <div className="mt-8 flex items-center gap-4 flex-wrap">
               <Button asChild size="lg" className="h-11 px-5">
-                <Link href={hasSmtp ? ROUTES.smtp : ROUTES.smtpNew}>
-                  {hasSmtp ? 'manage smtp →' : 'connect smtp →'}
+                <Link href={hasSmtp ? ROUTES.send : ROUTES.smtpNew}>
+                  {hasSmtp ? 'send first invite →' : 'connect smtp →'}
                 </Link>
               </Button>
+              {hasSmtp && (
+                <Button asChild variant="outline" size="lg" className="h-11 px-5">
+                  <Link href={ROUTES.smtp}>manage smtp</Link>
+                </Button>
+              )}
               {!hasSmtp && (
                 <span className="font-hand text-2xl text-[var(--color-electric-blue)]">
                   start here

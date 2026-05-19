@@ -110,6 +110,22 @@ export interface Database {
         Args: { p_config_id: string };
         Returns: undefined;
       };
+      get_smtp_with_password: {
+        Args: { p_config_id: string };
+        Returns: {
+          id: string;
+          label: string;
+          from_name: string;
+          from_email: string;
+          host: string;
+          port: number;
+          secure: boolean;
+          username: string;
+          password: string;
+          reply_to: string | null;
+          is_default: boolean;
+        }[];
+      };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };

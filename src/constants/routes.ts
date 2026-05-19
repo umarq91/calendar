@@ -15,6 +15,7 @@ export const ROUTES = {
 
   // App (authenticated)
   dashboard: '/dashboard',
+  send: '/send',
   contacts: '/contacts',
   campaigns: '/campaigns',
   smtp: '/settings/smtp',
@@ -22,4 +23,10 @@ export const ROUTES = {
 } as const;
 
 /** Prefixes the proxy treats as authenticated. */
-export const PROTECTED_PREFIXES = ['/dashboard', '/settings', '/campaigns', '/contacts'] as const;
+export const PROTECTED_PREFIXES = [
+  '/dashboard',
+  '/send',
+  '/settings',
+  '/campaigns',
+  '/contacts',
+] as const;

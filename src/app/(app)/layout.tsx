@@ -5,14 +5,15 @@ import { signOut } from '@/app/auth/_actions';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/sonner';
 import { MetaBar, VerticalLabel } from '@/components/editorial/primitives';
-import { Calendar, LayoutDashboard, Users, Settings, LogOut } from 'lucide-react';
+import { Calendar, LayoutDashboard, Send, Users, Settings, LogOut } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 
 const NAV = [
   { href: ROUTES.dashboard, label: '01 · dashboard', icon: LayoutDashboard },
-  { href: ROUTES.contacts, label: '02 · contacts', icon: Users },
-  { href: ROUTES.campaigns, label: '03 · campaigns', icon: Calendar },
-  { href: ROUTES.smtp, label: '04 · settings', icon: Settings },
+  { href: ROUTES.send, label: '02 · send invite', icon: Send },
+  { href: ROUTES.contacts, label: '03 · contacts', icon: Users },
+  { href: ROUTES.campaigns, label: '04 · campaigns', icon: Calendar },
+  { href: ROUTES.smtp, label: '05 · settings', icon: Settings },
 ];
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
