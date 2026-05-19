@@ -12,7 +12,8 @@
       "Bash(NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 NEXT_PUBLIC_SUPABASE_ANON_KEY=stub NEXT_PUBLIC_APP_URL=http://localhost:3000 SUPABASE_SERVICE_ROLE_KEY=stub npx next build)",
       "Bash(npx eslint *)",
       "Bash(echo \"tsc:$?\")",
-      "Bash(echo \"lint:$?\")"
+      "Bash(echo \"lint:$?\")",
+      "Bash(git mv *)"
     ]
   }
 }

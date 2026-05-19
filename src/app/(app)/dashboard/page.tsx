@@ -1,0 +1,94 @@
+import Link from 'next/link';
+import { createClient } from '@/lib/supabase/server';
+import { countSmtpConfigs } from '@/data/smtp';
+import { ROUTES } from '@/constants/routes';
+import { Button } from '@/components/ui/button';
+import { Tag, Divider } from '@/components/editorial/primitives';
+import { ArrowPointer, Starburst } from '@/components/editorial/annotations';
+
+export const metadata = { title: 'dashboard — invitewave' };
+
+export default async function DashboardPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const smtpCount = await countSmtpConfigs();
+  const hasSmtp = smtpCount > 0;
+  const firstName = (user?.user_metadata?.full_name as string | undefined)?.split(' ')[0];
+
+  return (
+    <div className="max-w-5xl">
+      <Tag>00 · dashboard</Tag>
+      <h1 className="font-display mt-5 text-[5rem] sm:text-[6rem] leading-[0.9] tracking-[-0.04em] lowercase">
+        welcome
+        {firstName ? <>, <span className="text-[var(--color-electric-blue)]">{firstName.toLowerCase()}</span></> : null}.
+      </h1>
+      <p className="mt-6 max-w-xl text-[15px] text-[var(--color-ink-black)] leading-relaxed">
+        Calendar invites at scale through your own SMTP server. One last step
+        before your first campaign.
+      </p>
+
+      <Divider className="my-12" />
+
+      <section className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-10">
+        {/* Setup card */}
+        <div className="relative">
+          <Starburst size={48} className="absolute -top-4 -right-4 opacity-90" />
+          <div className="border border-[var(--color-ink-black)] bg-[var(--color-pure-white)] p-8">
+            <Tag solid>{hasSmtp ? 'connected' : 'step 01'}</Tag>
+            <h2 className="font-display mt-4 text-[2.5rem] leading-[0.95] tracking-[-0.02em] lowercase">
+              {hasSmtp ? 'smtp connected.' : 'connect your smtp.'}
+            </h2>
+            <p className="mt-4 text-[15px] text-[var(--color-ink-black)] max-w-md leading-relaxed">
+              {hasSmtp
+                ? 'You can manage connections in Settings.'
+                : 'InviteWave sends through your own SMTP server. Add one to start sending.'}
+            </p>
+            <div className="mt-8 flex items-center gap-4">
+              <Button asChild size="lg" className="h-11 px-5">
+                <Link href={hasSmtp ? ROUTES.smtp : ROUTES.smtpNew}>
+                  {hasSmtp ? 'manage smtp →' : 'connect smtp →'}
+                </Link>
+              </Button>
+              {!hasSmtp && (
+                <span className="font-hand text-2xl text-[var(--color-electric-blue)]">
+                  start here
+                </span>
+              )}
+              {!hasSmtp && <ArrowPointer className="h-6 w-16 -ml-2 -rotate-180" />}
+            </div>
+          </div>
+        </div>
+
+        {/* Roadmap pane */}
+        <aside className="bg-[var(--color-ink-black)] text-[var(--color-paper-white)] p-8">
+          <Tag className="border-[var(--color-paper-white)] text-[var(--color-paper-white)]">
+            roadmap
+          </Tag>
+          <ul className="mt-6 space-y-4 text-[14px]">
+            <RoadmapItem n="02" label="import contacts" />
+            <RoadmapItem n="03" label="build a campaign" />
+            <RoadmapItem n="04" label="send + track" />
+          </ul>
+          <p className="mt-10 editorial-meta text-[var(--color-gray-300)]">
+            shipping monthly · 2025
+          </p>
+        </aside>
+      </section>
+    </div>
+  );
+}
+
+function RoadmapItem({ n, label }: { n: string; label: string }) {
+  return (
+    <li className="flex items-baseline gap-4">
+      <span className="font-display text-[var(--color-electric-blue)] text-[1.5rem] leading-none">
+        {n}
+      </span>
+      <span className="flex-1 border-b border-dashed border-[var(--color-gray-600)] translate-y-[-4px]" />
+      <span className="lowercase text-[var(--color-paper-white)]">{label}</span>
+    </li>
+  );
+}

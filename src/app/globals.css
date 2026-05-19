@@ -1,0 +1,234 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* Editorial palette */
+  --color-electric-blue: #2B2BFF;
+  --color-ink-black:     #0A0A0A;
+  --color-paper-white:   #F7F6F2;
+  --color-pure-white:    #FFFFFF;
+  --color-gray-100:      #EDEDED;
+  --color-gray-300:      #C4C4C4;
+  --color-gray-600:      #6B6B6B;
+  --color-gray-900:      #1A1A1A;
+
+  /* shadcn mapping → editorial */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Fonts (provided by next/font) */
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display-anton);
+  --font-hand: var(--font-hand-caveat);
+
+  /* Type scale */
+  --text-display-2xl: 8rem;
+  --text-display-xl:  5.5rem;
+  --text-display-lg:  3.75rem;
+  --text-display-md:  2.5rem;
+  --text-display-sm:  1.75rem;
+  --text-body-lg:     1.125rem;
+  --text-body-md:     1rem;
+  --text-body-sm:     0.875rem;
+  --text-meta:        0.75rem;
+
+  /* Spacing scale */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+  --space-9:  96px;
+  --space-10: 128px;
+  --space-11: 192px;
+
+  /* Near-square radii — system rule */
+  --radius-none: 0px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
+  --radius-2xl: 4px;
+  --radius-3xl: 4px;
+  --radius-4xl: 4px;
+}
+
+:root {
+  /* Editorial base */
+  --background: #F7F6F2;            /* paper-white */
+  --foreground: #0A0A0A;            /* ink-black */
+  --card: #FFFFFF;
+  --card-foreground: #0A0A0A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0A0A0A;
+
+  /* Primary = ink black (buttons), accent = electric blue */
+  --primary: #0A0A0A;
+  --primary-foreground: #F7F6F2;
+  --secondary: #EDEDED;
+  --secondary-foreground: #0A0A0A;
+  --muted: #EDEDED;
+  --muted-foreground: #0A0A0A;
+  --accent: #2B2BFF;                /* electric blue */
+  --accent-foreground: #FFFFFF;
+  --destructive: #2B2BFF;           /* per system: blue owns chromatic expression */
+
+  --border: #C4C4C4;
+  --input: #C4C4C4;
+  --ring: #2B2BFF;
+
+  --chart-1: #2B2BFF;
+  --chart-2: #0A0A0A;
+  --chart-3: #6B6B6B;
+  --chart-4: #C4C4C4;
+  --chart-5: #EDEDED;
+
+  --radius: 2px;
+
+  --sidebar: #0A0A0A;
+  --sidebar-foreground: #F7F6F2;
+  --sidebar-primary: #2B2BFF;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #1A1A1A;
+  --sidebar-accent-foreground: #F7F6F2;
+  --sidebar-border: #1A1A1A;
+  --sidebar-ring: #2B2BFF;
+}
+
+.dark {
+  /* Dark = inverted, but blue accent unchanged */
+  --background: #0A0A0A;
+  --foreground: #F7F6F2;
+  --card: #1A1A1A;
+  --card-foreground: #F7F6F2;
+  --popover: #1A1A1A;
+  --popover-foreground: #F7F6F2;
+  --primary: #F7F6F2;
+  --primary-foreground: #0A0A0A;
+  --secondary: #1A1A1A;
+  --secondary-foreground: #F7F6F2;
+  --muted: #1A1A1A;
+  --muted-foreground: #C4C4C4;
+  --accent: #2B2BFF;
+  --accent-foreground: #FFFFFF;
+  --destructive: #2B2BFF;
+  --border: #1A1A1A;
+  --input: #1A1A1A;
+  --ring: #2B2BFF;
+  --sidebar: #0A0A0A;
+  --sidebar-foreground: #F7F6F2;
+  --sidebar-primary: #2B2BFF;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #1A1A1A;
+  --sidebar-accent-foreground: #F7F6F2;
+  --sidebar-border: #1A1A1A;
+  --sidebar-ring: #2B2BFF;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body), 'Inter', system-ui, sans-serif;
+    font-feature-settings: "ss01", "cv11";
+  }
+  html {
+    font-family: var(--font-body), 'Inter', system-ui, sans-serif;
+  }
+
+  /* Editorial display utility — apply via class name on h1/h2 */
+  .font-display {
+    font-family: var(--font-display-anton), 'Anton', 'Impact', sans-serif;
+    font-weight: 400;        /* Anton ships as single weight 400 */
+    letter-spacing: -0.03em;
+    line-height: 0.92;
+    text-transform: lowercase;
+  }
+  .font-hand {
+    font-family: var(--font-hand-caveat), 'Caveat', cursive;
+  }
+}
+
+@layer components {
+  /* Editorial meta bar — page numbers, project tag */
+  .editorial-meta {
+    font-family: var(--font-body);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink-black);
+  }
+
+  /* Tag pill */
+  .editorial-tag {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-electric-blue);
+    border: 1px solid var(--color-electric-blue);
+    padding: 3px 8px;
+    border-radius: 2px;
+  }
+  .editorial-tag-solid {
+    background: var(--color-electric-blue);
+    color: var(--color-pure-white);
+    border-color: var(--color-electric-blue);
+  }
+
+  /* Vertical rotated section label */
+  .editorial-vlabel {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family: var(--font-display-anton);
+    text-transform: lowercase;
+    letter-spacing: -0.02em;
+    color: var(--color-electric-blue);
+    line-height: 1;
+  }
+
+  /* B&W photo treatment */
+  .editorial-photo {
+    filter: grayscale(100%) contrast(1.15);
+  }
+}

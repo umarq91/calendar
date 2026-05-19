@@ -1,0 +1,294 @@
+'use client';
+
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { AlertTriangle, ExternalLink, Lock } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Tag } from '@/components/editorial/primitives';
+
+import { GMAIL, smtpFormSchema, type SmtpFormInput } from '../schema';
+import { verifySmtpConfig } from '../_actions';
+
+type Status =
+  | { kind: 'idle' }
+  | { kind: 'verifying' }
+  | { kind: 'sending' }
+  | { kind: 'saving' };
+
+export function SmtpForm() {
+  const router = useRouter();
+  const [status, setStatus] = useState<Status>({ kind: 'idle' });
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SmtpFormInput>({
+    resolver: zodResolver(smtpFormSchema),
+    defaultValues: {
+      label: 'Gmail',
+      from_name: '',
+      from_email: '',
+      host: GMAIL.host,
+      port: GMAIL.port,
+      secure: GMAIL.secure,
+      username: '',
+      password: '',
+      reply_to: '',
+    },
+  });
+
+  const pending = status.kind !== 'idle';
+
+  async function onSubmit(values: SmtpFormInput) {
+    setServerError(null);
+    setStatus({ kind: 'verifying' });
+    const tId = toast.loading('Verifying connection…');
+
+    const sendTimer = setTimeout(() => {
+      setStatus({ kind: 'sending' });
+      toast.loading('Sending test email…', { id: tId });
+    }, 1500);
+
+    const payload: SmtpFormInput = {
+      ...values,
+      host: GMAIL.host,
+      port: GMAIL.port,
+      secure: GMAIL.secure,
+    };
+
+    const result = await verifySmtpConfig(payload);
+    clearTimeout(sendTimer);
+
+    if (!result.ok) {
+      toast.error(result.error, { id: tId });
+      setServerError(result.error);
+      setStatus({ kind: 'idle' });
+      return;
+    }
+
+    toast.success(`Verified. Test email sent to ${result.testEmailTo}.`, { id: tId });
+    setStatus({ kind: 'saving' });
+    router.push('/settings/smtp');
+    router.refresh();
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-12">
+      {/* Provider — fixed */}
+      <Section number="01" title="provider" caption="Gmail SMTP. More providers shipping soon.">
+        <div className="flex items-center gap-4 border border-[var(--color-ink-black)] bg-[var(--color-pure-white)] px-5 py-4">
+          <span className="inline-flex h-10 w-10 items-center justify-center bg-[var(--color-ink-black)] text-[var(--color-paper-white)] font-display text-xl leading-none">
+            g
+          </span>
+          <div className="flex-1">
+            <div className="text-[15px] font-medium lowercase">gmail</div>
+            <div className="editorial-meta text-[var(--color-ink-black)]">
+              {GMAIL.host}:{GMAIL.port} · starttls
+            </div>
+          </div>
+          <Lock className="h-4 w-4 text-[var(--color-ink-black)]" />
+        </div>
+      </Section>
+
+      {/* Identity */}
+      <Section number="02" title="identity" caption="How recipients see this connection in their inbox.">
+        <Field label="Label" error={errors.label?.message} hint="Only you see this.">
+          <Input {...register('label')} placeholder="My Gmail" disabled={pending} />
+        </Field>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <Field label="From name" error={errors.from_name?.message}>
+            <Input {...register('from_name')} placeholder="Alice Founder" disabled={pending} />
+          </Field>
+          <Field label="From email" error={errors.from_email?.message}>
+            <Input
+              {...register('from_email')}
+              type="email"
+              placeholder="you@gmail.com"
+              disabled={pending}
+            />
+          </Field>
+        </div>
+
+        <Field
+          label="Reply-To (optional)"
+          error={errors.reply_to?.message}
+          hint="Where bounces and replies should go, if different from From."
+        >
+          <Input {...register('reply_to')} type="email" disabled={pending} />
+        </Field>
+      </Section>
+
+      {/* Auth */}
+      <Section
+        number="03"
+        title="authentication"
+        caption="Your Gmail address and a Google App Password."
+      >
+        <Alert>
+          <AlertTriangle className="h-4 w-4 text-[var(--color-electric-blue)]" />
+          <AlertTitle>app password required</AlertTitle>
+          <AlertDescription>
+            Gmail does not accept your normal account password over SMTP. You need an{' '}
+            <strong className="text-[var(--color-ink-black)]">App Password</strong> — a
+            16-character code generated by Google.{' '}
+            <a
+              href={GMAIL.appPasswordUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 underline text-[var(--color-electric-blue)]"
+            >
+              Generate one
+              <ExternalLink className="h-3 w-3" />
+            </a>
+            . 2-Step Verification must be enabled on the Google account first.
+          </AlertDescription>
+        </Alert>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <Field label="Gmail address" error={errors.username?.message}>
+            <Input
+              {...register('username')}
+              type="email"
+              autoComplete="username"
+              placeholder="you@gmail.com"
+              disabled={pending}
+            />
+          </Field>
+          <Field
+            label="Gmail App Password"
+            error={errors.password?.message}
+            hint="16 characters from myaccount.google.com/apppasswords"
+          >
+            <Input
+              {...register('password')}
+              type="password"
+              autoComplete="new-password"
+              placeholder="abcd efgh ijkl mnop"
+              disabled={pending}
+            />
+          </Field>
+        </div>
+      </Section>
+
+      {/* Locked SMTP fields */}
+      <Section
+        number="04"
+        title="smtp settings"
+        caption="Locked to Gmail's standard configuration."
+      >
+        <input type="hidden" {...register('host')} value={GMAIL.host} readOnly />
+        <input
+          type="hidden"
+          {...register('port', { valueAsNumber: true })}
+          value={GMAIL.port}
+          readOnly
+        />
+        <input type="hidden" {...register('secure')} value={String(GMAIL.secure)} readOnly />
+
+        <div className="grid grid-cols-3 gap-4">
+          <ReadOnly label="host" value={GMAIL.host} />
+          <ReadOnly label="port" value={String(GMAIL.port)} />
+          <ReadOnly label="encryption" value="STARTTLS" />
+        </div>
+      </Section>
+
+      {serverError && (
+        <Alert variant="destructive">
+          <AlertDescription>{serverError}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="flex items-center gap-5 pt-2">
+        <Button type="submit" size="lg" disabled={pending} className="h-12 px-6 text-[15px]">
+          {status.kind === 'verifying' && 'verifying connection…'}
+          {status.kind === 'sending' && 'sending test email…'}
+          {status.kind === 'saving' && 'saving…'}
+          {status.kind === 'idle' && 'verify and save →'}
+        </Button>
+        <p className="text-[13px] text-[var(--color-ink-black)] max-w-xs">
+          We&apos;ll send a real test email to your inbox before saving anything.
+        </p>
+      </div>
+    </form>
+  );
+}
+
+function Section({
+  number,
+  title,
+  caption,
+  children,
+}: {
+  number: string;
+  title: string;
+  caption?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="grid grid-cols-1 lg:grid-cols-[14rem_1fr] gap-8">
+      <header className="space-y-3">
+        <Tag>{number}</Tag>
+        <h2 className="font-display text-[2rem] leading-[0.95] tracking-[-0.02em] lowercase">
+          {title}
+        </h2>
+        {caption && (
+          <p className="text-[13px] text-[var(--color-ink-black)] leading-relaxed">
+            {caption}
+          </p>
+        )}
+      </header>
+      <div className="space-y-5">{children}</div>
+    </section>
+  );
+}
+
+function Field({
+  label,
+  error,
+  hint,
+  className,
+  children,
+}: {
+  label: string;
+  error?: string;
+  hint?: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={`space-y-2 ${className ?? ''}`}>
+      <Label>{label}</Label>
+      {children}
+      {hint && !error && <p className="text-[12px] text-[var(--color-ink-black)]">{hint}</p>}
+      {error && (
+        <p className="text-[12px] uppercase tracking-[0.08em] text-[var(--color-electric-blue)]">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ReadOnly({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <Input
+        value={value}
+        readOnly
+        disabled
+        className="bg-[var(--color-gray-100)] border-[var(--color-gray-300)] text-[var(--color-ink-black)]"
+      />
+    </div>
+  );
+}
