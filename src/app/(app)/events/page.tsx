@@ -3,9 +3,11 @@ import { listEvents } from '@/data/events';
 import { ROUTES } from '@/constants/routes';
 import { Button } from '@/components/ui/button';
 import { Tag, Divider } from '@/components/editorial/primitives';
-import { Calendar } from 'lucide-react';
+import { Calendar, ArrowUpRight } from 'lucide-react';
 
 export const metadata = { title: 'events — let’s calendar' };
+
+const COLS = 'grid-cols-[minmax(0,1fr)_8.5rem_8.5rem_6rem_8rem_2.5rem]';
 
 export default async function EventsListPage() {
   const events = await listEvents();
@@ -36,43 +38,76 @@ export default async function EventsListPage() {
     );
   }
 
+  const totalRecipients = events.reduce((s, e) => s + e.recipient_count, 0);
+  const totalSent = events.reduce((s, e) => s + e.sent_count, 0);
+
   return (
-    <div className="max-w-5xl">
-      <Tag>03 · events</Tag>
-      <h1 className="font-display mt-5 text-[4rem] sm:text-[5rem] leading-[0.92] tracking-[-0.03em] lowercase">
-        events.
-      </h1>
-      <p className="mt-6 max-w-xl text-[15px] text-[var(--color-ink-black)] leading-relaxed">
-        Every batch you&apos;ve sent. Click a row for per-recipient delivery
-        status.
-      </p>
+    <div className="max-w-[1400px]">
+      <div className="flex flex-wrap items-end justify-between gap-6">
+        <div>
+          <Tag>03 · events</Tag>
+          <h1 className="font-display mt-5 text-[4rem] sm:text-[5rem] leading-[0.92] tracking-[-0.03em] lowercase">
+            events.
+          </h1>
+          <p className="mt-6 max-w-xl text-[15px] text-[var(--color-ink-black)] leading-relaxed">
+            Every batch you&apos;ve sent. Click a row for per-recipient delivery
+            status.
+          </p>
+        </div>
+        <div className="flex items-baseline gap-8 pb-2">
+          <Stat n={events.length} label="batches" />
+          <Stat n={totalRecipients} label="recipients" />
+          <Stat n={totalSent} label="delivered" />
+          <Button asChild className="h-11 px-5 ml-2">
+            <Link href={ROUTES.send}>new batch →</Link>
+          </Button>
+        </div>
+      </div>
 
       <Divider className="my-10" />
 
       <div className="border border-[var(--color-ink-black)] bg-[var(--color-pure-white)]">
-        <header className="grid grid-cols-[1fr_10rem_8rem_8rem] gap-4 border-b border-[var(--color-ink-black)] px-6 py-3 editorial-meta">
+        <header
+          className={`grid ${COLS} gap-6 border-b border-[var(--color-ink-black)] px-8 py-4 editorial-meta`}
+        >
           <span>title</span>
+          <span>created</span>
           <span>scheduled</span>
           <span className="text-right">recipients</span>
           <span className="text-right">delivery</span>
+          <span />
         </header>
         <ul className="divide-y divide-[var(--color-gray-300)]">
           {events.map((e) => (
-            <li key={e.id}>
+            <li key={e.id} className="group">
               <Link
                 href={`${ROUTES.events}/${e.id}`}
-                className="grid grid-cols-[1fr_10rem_8rem_8rem] gap-4 px-6 py-4 items-baseline hover:bg-[var(--color-paper-white)] transition-colors"
+                className={`grid ${COLS} gap-6 items-baseline px-8 py-5 hover:bg-[var(--color-paper-white)] transition-colors`}
               >
                 <div className="min-w-0">
-                  <div className="text-[15px] truncate lowercase">{e.summary}</div>
-                  <div className="editorial-meta text-[var(--color-gray-600)] mt-1">
-                    sent {fmtDate(e.created_at)}
+                  <div className="text-[16px] truncate lowercase font-medium">
+                    {e.summary}
                   </div>
+                  {e.location && (
+                    <div className="mt-1 text-[12px] text-[var(--color-gray-600)] truncate">
+                      {e.location}
+                    </div>
+                  )}
                 </div>
-                <div className="text-[13px]">{fmtDate(e.start_at)}</div>
-                <div className="text-right text-[13px]">{e.recipient_count}</div>
-                <div className="text-right text-[13px]">
-                  <DeliveryBadge sent={e.sent_count} failed={e.failed_count} total={e.recipient_count} />
+                <CellTime iso={e.created_at} />
+                <CellTime iso={e.start_at} accent />
+                <div className="text-right text-[14px] tabular-nums">
+                  {e.recipient_count}
+                </div>
+                <div className="text-right">
+                  <DeliveryBadge
+                    sent={e.sent_count}
+                    failed={e.failed_count}
+                    total={e.recipient_count}
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <ArrowUpRight className="h-4 w-4 text-[var(--color-gray-600)] group-hover:text-[var(--color-electric-blue)] transition-colors" />
                 </div>
               </Link>
             </li>
@@ -83,7 +118,48 @@ export default async function EventsListPage() {
   );
 }
 
-function DeliveryBadge({ sent, failed, total }: { sent: number; failed: number; total: number }) {
+function Stat({ n, label }: { n: number; label: string }) {
+  return (
+    <div>
+      <div className="font-display text-[2rem] leading-none lowercase tabular-nums">
+        {n.toLocaleString()}
+      </div>
+      <div className="editorial-meta mt-1.5 text-[var(--color-gray-600)]">{label}</div>
+    </div>
+  );
+}
+
+function CellTime({ iso, accent }: { iso: string; accent?: boolean }) {
+  const date = fmtDate(iso);
+  const time = fmtTime(iso);
+  return (
+    <div className="text-[13px] leading-tight">
+      <div
+        className={
+          accent
+            ? 'text-[var(--color-ink-black)] font-medium'
+            : 'text-[var(--color-ink-black)]'
+        }
+      >
+        {date}
+      </div>
+      <div className="text-[12px] text-[var(--color-gray-600)] mt-0.5">
+        {time}
+      </div>
+    </div>
+  );
+}
+
+function DeliveryBadge({
+  sent,
+  failed,
+  total,
+}: {
+  sent: number;
+  failed: number;
+  total: number;
+}) {
+  if (total === 0) return <span className="editorial-tag">pending</span>;
   if (failed === 0 && sent === total) {
     return <span className="editorial-tag-solid">all sent</span>;
   }
@@ -102,10 +178,15 @@ function DeliveryBadge({ sent, failed, total }: { sent: number; failed: number; 
 }
 
 function fmtDate(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleString(undefined, {
+  return new Date(iso).toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+function fmtTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString(undefined, {
     hour: 'numeric',
     minute: '2-digit',
   });

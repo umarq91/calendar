@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { countSmtpConfigs } from '@/data/smtp';
-import { countEvents } from '@/data/events';
+import { getDashboardStats } from '@/data/events';
 import { ROUTES } from '@/constants/routes';
 import { Button } from '@/components/ui/button';
 import { Tag, Divider } from '@/components/editorial/primitives';
@@ -15,12 +15,12 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [smtpCount, eventsCount] = await Promise.all([
+  const [smtpCount, stats] = await Promise.all([
     countSmtpConfigs(),
-    countEvents(),
+    getDashboardStats(),
   ]);
   const hasSmtp = smtpCount > 0;
-  const hasEvents = eventsCount > 0;
+  const hasEvents = stats.eventsCount > 0;
   const firstName = (user?.user_metadata?.full_name as string | undefined)?.split(' ')[0];
 
   return (
@@ -34,6 +34,27 @@ export default async function DashboardPage() {
         Calendar invites at scale through your own SMTP server. One last step
         before your first campaign.
       </p>
+
+      <section className="mt-12 grid grid-cols-2 sm:grid-cols-4 border-y border-[var(--color-ink-black)]">
+        <Kpi
+          value={String(stats.eventsCount)}
+          label="events sent"
+        />
+        <Kpi
+          value={stats.recipientsReached.toLocaleString()}
+          label="recipients reached"
+        />
+        <Kpi
+          value={stats.successRate === null ? '—' : `${Math.round(stats.successRate * 100)}%`}
+          label="success rate"
+          hint={stats.successRate === null ? undefined : `${stats.recipientsReached} / ${stats.totalRecipients}`}
+        />
+        <Kpi
+          value={stats.lastSentAt ? fmtRelative(stats.lastSentAt) : '—'}
+          label="last sent"
+          isLast
+        />
+      </section>
 
       <Divider className="my-12" />
 
@@ -98,6 +119,50 @@ export default async function DashboardPage() {
       </section>
     </div>
   );
+}
+
+function Kpi({
+  value,
+  label,
+  hint,
+  isLast,
+}: {
+  value: string;
+  label: string;
+  hint?: string;
+  isLast?: boolean;
+}) {
+  return (
+    <div
+      className={
+        'px-5 py-6 sm:px-6 sm:py-7 ' +
+        (isLast ? '' : 'sm:border-r border-[var(--color-gray-300)]')
+      }
+    >
+      <div className="font-display text-[2.75rem] sm:text-[3.25rem] leading-[0.9] tracking-[-0.03em] lowercase text-[var(--color-ink-black)]">
+        {value}
+      </div>
+      <div className="editorial-meta mt-3 text-[var(--color-ink-black)]">{label}</div>
+      {hint && (
+        <div className="mt-1 text-[11px] text-[var(--color-gray-600)]">{hint}</div>
+      )}
+    </div>
+  );
+}
+
+function fmtRelative(iso: string): string {
+  const then = new Date(iso).getTime();
+  const diffSec = Math.max(0, Math.floor((Date.now() - then) / 1000));
+  if (diffSec < 60) return 'just now';
+  const min = Math.floor(diffSec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const d = Math.floor(hr / 24);
+  if (d < 30) return `${d}d ago`;
+  const mo = Math.floor(d / 30);
+  if (mo < 12) return `${mo}mo ago`;
+  return `${Math.floor(mo / 12)}y ago`;
 }
 
 function RoadmapItem({ n, label, done }: { n: string; label: string; done?: boolean }) {
