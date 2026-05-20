@@ -2,7 +2,7 @@
 
 import { type ChangeEvent, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 
@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tag } from '@/components/editorial/primitives';
+import { DateTimePicker } from '@/components/editorial/datetime-picker';
 import { parseRecipients } from '@/lib/recipients';
 import { parseCsvToRecipientLines } from '@/lib/csv';
 import { ROUTES } from '@/constants/routes';
@@ -71,6 +72,7 @@ export function SendInviteForm({
   });
 
   const recipientsRaw = useWatch({ control, name: 'recipients_raw' });
+  const startLocal = useWatch({ control, name: 'start_local' });
 
   async function handleCsvUpload(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -218,21 +220,48 @@ export function SendInviteForm({
           />
         </Field>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <Field label="Start" error={errors.start_local?.message}>
-            <Input
-              {...register('start_local')}
-              type="datetime-local"
-              disabled={pending}
-            />
-          </Field>
-          <Field label="End" error={errors.end_local?.message}>
-            <Input
-              {...register('end_local')}
-              type="datetime-local"
-              disabled={pending}
-            />
-          </Field>
+        <div className="space-y-4">
+          <Controller
+            control={control}
+            name="start_local"
+            render={({ field }) => (
+              <div className="space-y-2">
+                <DateTimePicker
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  disabled={pending}
+                  ariaLabel="event start"
+                  label="start"
+                />
+                {errors.start_local?.message && (
+                  <p className="text-[12px] uppercase tracking-[0.08em] text-[var(--color-electric-blue)]">
+                    {errors.start_local.message}
+                  </p>
+                )}
+              </div>
+            )}
+          />
+          <Controller
+            control={control}
+            name="end_local"
+            render={({ field }) => (
+              <div className="space-y-2">
+                <DateTimePicker
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  min={startLocal || undefined}
+                  disabled={pending}
+                  ariaLabel="event end"
+                  label="end"
+                />
+                {errors.end_local?.message && (
+                  <p className="text-[12px] uppercase tracking-[0.08em] text-[var(--color-electric-blue)]">
+                    {errors.end_local.message}
+                  </p>
+                )}
+              </div>
+            )}
+          />
         </div>
 
         <Field label="Location (optional)" error={errors.location?.message}>
