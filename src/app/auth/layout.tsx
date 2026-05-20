@@ -6,7 +6,7 @@ import { Starburst } from '@/components/editorial/annotations';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] bg-[var(--color-paper-white)]">
+    <div className="min-h-screen grid grid-rows-1 grid-cols-1 lg:grid-cols-[1.1fr_1fr] bg-[var(--color-paper-white)]">
       {/* Left — editorial cover panel */}
       <aside className="relative hidden lg:flex flex-col justify-between bg-[var(--color-ink-black)] text-[var(--color-paper-white)] p-12 overflow-hidden">
         <MetaBar

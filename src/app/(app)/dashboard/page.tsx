@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { countSmtpConfigs } from '@/data/smtp';
 import { getDashboardStats } from '@/data/events';
 import { ROUTES } from '@/constants/routes';
+import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tag, Divider } from '@/components/editorial/primitives';
 import { ArrowPointer, Starburst } from '@/components/editorial/annotations';
@@ -167,19 +168,22 @@ function fmtRelative(iso: string): string {
 
 function RoadmapItem({ n, label, done }: { n: string; label: string; done?: boolean }) {
   return (
-    <li className="flex items-baseline gap-4">
+    <li className="flex items-center gap-4">
       <span className="font-display text-[var(--color-electric-blue)] text-[1.5rem] leading-none">
         {n}
       </span>
-      <span className="flex-1 border-b border-dashed border-[var(--color-gray-600)] translate-y-[-4px]" />
+      <span className="flex-1 border-b border-dashed border-[var(--color-gray-600)]" />
+      <span className="lowercase text-[var(--color-paper-white)]">{label}</span>
       <span
+        aria-label={done ? 'done' : 'pending'}
         className={
-          done
-            ? 'lowercase text-[var(--color-paper-white)] line-through decoration-[var(--color-electric-blue)] decoration-2'
-            : 'lowercase text-[var(--color-paper-white)]'
+          'inline-flex h-5 w-5 items-center justify-center border ' +
+          (done
+            ? 'bg-[var(--color-electric-blue)] border-[var(--color-electric-blue)] text-[var(--color-pure-white)]'
+            : 'border-[var(--color-gray-600)] text-transparent')
         }
       >
-        {label}
+        <Check className="h-3.5 w-3.5" strokeWidth={3} />
       </span>
     </li>
   );
