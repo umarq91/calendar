@@ -16,8 +16,7 @@ export const ROUTES = {
   // App (authenticated)
   dashboard: '/dashboard',
   send: '/send',
-  contacts: '/contacts',
-  campaigns: '/campaigns',
+  events: '/events',
   smtp: '/settings/smtp',
   smtpNew: '/settings/smtp/new',
 } as const;
@@ -26,7 +25,6 @@ export const ROUTES = {
 export const PROTECTED_PREFIXES = [
   '/dashboard',
   '/send',
+  '/events',
   '/settings',
-  '/campaigns',
-  '/contacts',
 ] as const;

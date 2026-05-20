@@ -13,7 +13,8 @@
       "Bash(npx eslint *)",
       "Bash(echo \"tsc:$?\")",
       "Bash(echo \"lint:$?\")",
-      "Bash(git mv *)"
+      "Bash(git mv *)",
+      "Bash(npm run *)"
     ]
   }
 }

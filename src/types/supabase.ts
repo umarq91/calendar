@@ -38,6 +38,96 @@ export interface Database {
         };
         Relationships: [];
       };
+      events: {
+        Row: {
+          id: string;
+          user_id: string;
+          smtp_config_id: string;
+          ics_uid: string;
+          summary: string;
+          description: string | null;
+          location: string | null;
+          start_at: string;
+          end_at: string;
+          sequence: number;
+          recipient_count: number;
+          sent_count: number;
+          failed_count: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          smtp_config_id: string;
+          ics_uid: string;
+          summary: string;
+          description?: string | null;
+          location?: string | null;
+          start_at: string;
+          end_at: string;
+          sequence?: number;
+          recipient_count?: number;
+          sent_count?: number;
+          failed_count?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          smtp_config_id?: string;
+          ics_uid?: string;
+          summary?: string;
+          description?: string | null;
+          location?: string | null;
+          start_at?: string;
+          end_at?: string;
+          sequence?: number;
+          recipient_count?: number;
+          sent_count?: number;
+          failed_count?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      event_recipients: {
+        Row: {
+          id: string;
+          event_id: string;
+          user_id: string;
+          email: string;
+          name: string | null;
+          status: Database['public']['Enums']['event_recipient_status'];
+          error: string | null;
+          message_id: string | null;
+          sent_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_id: string;
+          user_id: string;
+          email: string;
+          name?: string | null;
+          status?: Database['public']['Enums']['event_recipient_status'];
+          error?: string | null;
+          message_id?: string | null;
+          sent_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          event_id?: string;
+          user_id?: string;
+          email?: string;
+          name?: string | null;
+          status?: Database['public']['Enums']['event_recipient_status'];
+          error?: string | null;
+          message_id?: string | null;
+          sent_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       smtp_configs: {
         Row: {
           id: string;
@@ -127,7 +217,9 @@ export interface Database {
         }[];
       };
     };
-    Enums: { [_ in never]: never };
+    Enums: {
+      event_recipient_status: 'pending' | 'sent' | 'failed';
+    };
     CompositeTypes: { [_ in never]: never };
   };
 }

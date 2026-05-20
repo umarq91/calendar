@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { countSmtpConfigs } from '@/data/smtp';
+import { countEvents } from '@/data/events';
 import { ROUTES } from '@/constants/routes';
 import { Button } from '@/components/ui/button';
 import { Tag, Divider } from '@/components/editorial/primitives';
@@ -14,8 +15,12 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const smtpCount = await countSmtpConfigs();
+  const [smtpCount, eventsCount] = await Promise.all([
+    countSmtpConfigs(),
+    countEvents(),
+  ]);
   const hasSmtp = smtpCount > 0;
+  const hasEvents = eventsCount > 0;
   const firstName = (user?.user_metadata?.full_name as string | undefined)?.split(' ')[0];
 
   return (
@@ -49,10 +54,19 @@ export default async function DashboardPage() {
             <div className="mt-8 flex items-center gap-4 flex-wrap">
               <Button asChild size="lg" className="h-11 px-5">
                 <Link href={hasSmtp ? ROUTES.send : ROUTES.smtpNew}>
-                  {hasSmtp ? 'send first invite →' : 'connect smtp →'}
+                  {hasSmtp
+                    ? hasEvents
+                      ? 'send another batch →'
+                      : 'send first invite →'
+                    : 'connect smtp →'}
                 </Link>
               </Button>
-              {hasSmtp && (
+              {hasSmtp && hasEvents && (
+                <Button asChild variant="outline" size="lg" className="h-11 px-5">
+                  <Link href={ROUTES.events}>view events</Link>
+                </Button>
+              )}
+              {hasSmtp && !hasEvents && (
                 <Button asChild variant="outline" size="lg" className="h-11 px-5">
                   <Link href={ROUTES.smtp}>manage smtp</Link>
                 </Button>
@@ -73,9 +87,9 @@ export default async function DashboardPage() {
             roadmap
           </Tag>
           <ul className="mt-6 space-y-4 text-[14px]">
-            <RoadmapItem n="02" label="import contacts" />
-            <RoadmapItem n="03" label="build a campaign" />
-            <RoadmapItem n="04" label="send + track" />
+            <RoadmapItem n="01" label="connect smtp" done={hasSmtp} />
+            <RoadmapItem n="02" label="send bulk invite" done={hasEvents} />
+            <RoadmapItem n="03" label="track delivery" done={hasEvents} />
           </ul>
           <p className="mt-10 editorial-meta text-[var(--color-gray-300)]">
             shipping monthly · 2025
@@ -86,14 +100,22 @@ export default async function DashboardPage() {
   );
 }
 
-function RoadmapItem({ n, label }: { n: string; label: string }) {
+function RoadmapItem({ n, label, done }: { n: string; label: string; done?: boolean }) {
   return (
     <li className="flex items-baseline gap-4">
       <span className="font-display text-[var(--color-electric-blue)] text-[1.5rem] leading-none">
         {n}
       </span>
       <span className="flex-1 border-b border-dashed border-[var(--color-gray-600)] translate-y-[-4px]" />
-      <span className="lowercase text-[var(--color-paper-white)]">{label}</span>
+      <span
+        className={
+          done
+            ? 'lowercase text-[var(--color-paper-white)] line-through decoration-[var(--color-electric-blue)] decoration-2'
+            : 'lowercase text-[var(--color-paper-white)]'
+        }
+      >
+        {label}
+      </span>
     </li>
   );
 }

@@ -46,8 +46,8 @@ export default async function SendPage() {
         calendar invite.
       </h1>
       <p className="mt-6 max-w-xl text-[15px] text-[var(--color-ink-black)] leading-relaxed">
-        One recipient, one calendar event. We&apos;ll send it through your
-        verified Gmail connection. RSVP card renders inline in Gmail / Outlook.
+        One event, many recipients. Each gets a personalized email with an RSVP
+        card. Sent through your verified Gmail connection.
       </p>
       <Divider className="my-10" />
       <SendInviteForm

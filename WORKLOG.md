@@ -36,3 +36,43 @@ Concise per-feature changelog. Append a new numbered entry each session. One fea
 ### Manual steps to enable
 - `supabase db push` (apply migration 0003)
 - Add Gmail SMTP at `/settings/smtp/new` if not already
+
+---
+
+## Work 04 — Bulk send + persisted events
+
+**Goal:** Send one event to many recipients in one batch. Persist every batch + per-recipient delivery status so users can audit what went out.
+
+### What
+ - 0004_events.sql — events + event_recipients tables, owner-only RLS, event_recipient_status enum
+  - src/lib/recipients.ts — pure parser (newline/comma/semicolon split, Name <email> support, dedupe, lowercase)
+  - sendBulkInvite action — persists event + recipients before send, decrypt SMTP once, pooled transporter, 150ms throttle, per-row status updates, count rollup
+  - /send form — multi-recipient textarea with live valid/duplicate/invalid chips + post-run results table linking to event 
+  - /events list + /events/[id] detail with stats and per-recipient status (sent_at or error)
+  - Nav cleaned: dropped placeholder contacts/campaigns, added 03 · events; dashboard roadmap reflects real state with strikethrough on done items
+  - ICS unchanged — already supports multi-attendee
+  - WORKLOG Work 04 appended
+  - **CSV import** `src/lib/csv.ts` + `upload csv` button on send form. Auto-detects email column, skips header rows, supports quoted cells. Imported rows are appended into the recipients textarea (re-uses live parser + dedupe + validation)
+  - src/lib/csv.ts — parseCsvToRecipientLines(text). Splits rows, quoted-cell safe, auto-detects email column per row, treats first non-email cell as name. Header rows drop naturally (no
+  email cell).
+  - /send form — upload csv outline button + hidden .csv/.txt file input. On select: reads, parses, appends to existing recipients textarea via setValue with shouldValidate. Toast confirms
+  count or error.
+  - **CSV format guide** collapsible `<details>` panel under upload button listing accepted shapes (email-only, `name,email`, `email,name`, quoted cells, optional header) with live example block + `download sample.csv` link that generates `recipients-sample.csv` client-side.
+
+
+### How it works
+
+1. User pastes recipients (one per line or comma/semicolon separated). Form parses live and shows valid/duplicate/invalid counts.
+2. On submit, `sendBulkInvite` re-validates server-side, then writes the `events` row + N `event_recipients` rows in `pending` status before any mail goes out (audit trail even on partial failure).
+3. Single ICS is built once with all attendees inside one VEVENT and a shared `ics_uid` — recipients see the roster and RSVPs collate under one organizer slot.
+4. One pooled `nodemailer` transporter loops through recipients with a 150ms gap. Each `sendMail` uses the recipient as the To header so the inbox personalizes correctly. Each row is updated to `sent` (with messageId + sent_at) or `failed` (with error) inline.
+5. After the loop, `events.sent_count` / `failed_count` are rolled up. Client gets per-recipient `results[]` and renders a status table with a link to the event detail.
+6. `/events` lists past batches with delivery badge; `/events/[id]` shows event metadata + per-recipient table (status + sent_at or error).
+
+### Verified
+- `tsc --noEmit`, `eslint --max-warnings 0`, `next build` all clean
+- `/send`, `/events`, `/events/[id]` routes registered; proxy still guards them
+
+### Manual steps to enable
+- `supabase db push` (apply migration 0004)
+- Use `/send` to fire a small batch (e.g. 2–3 of your own addresses) — confirm each receives a personalized RSVP card and `/events/<id>` shows accurate per-recipient status
