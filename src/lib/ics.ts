@@ -16,6 +16,11 @@ export type IcsInput = {
   attendees: { name?: string; email: string }[];
   /** Defaults to now. */
   dtstamp?: Date;
+  /** RFC 5545 RRULE value (without the `RRULE:` prefix). */
+  rrule?: string | null;
+  /** UTC instants to exclude from the recurrence series. Each may be a `Date`
+   *  or any value parseable by `new Date(...)`. */
+  exdates?: (Date | string)[];
 };
 
 const CRLF = '\r\n';
@@ -50,6 +55,14 @@ export function buildIcs(input: IcsInput): string {
   }
   if (input.location) {
     lines.push(`LOCATION:${escapeText(input.location)}`);
+  }
+
+  if (input.rrule) {
+    lines.push(`RRULE:${input.rrule}`);
+  }
+  if (input.exdates && input.exdates.length > 0) {
+    const stamps = input.exdates.map((d) => formatUtc(toDate(d))).join(',');
+    lines.push(`EXDATE:${stamps}`);
   }
 
   lines.push('END:VEVENT', 'END:VCALENDAR', '');

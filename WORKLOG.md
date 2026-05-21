@@ -76,3 +76,17 @@ Concise per-feature changelog. Append a new numbered entry each session. One fea
 ### Manual steps to enable
 - `supabase db push` (apply migration 0004)
 - Use `/send` to fire a small batch (e.g. 2–3 of your own addresses) — confirm each receives a personalized RSVP card and `/events/<id>` shows accurate per-recipient status
+
+---
+
+## Work 05 — Recurrence + exclusions
+
+**Done**
+- Events can now repeat (daily, weekly on chosen days, monthly by date or nth weekday, yearly).
+- End condition: never, after N occurrences, or on a chosen date.
+- Specific upcoming occurrences can be excluded from the series.
+- Recurrence + exclusions persist on the event and surface on `/events/[id]`.
+- Recipients' calendars (Gmail / Outlook / Apple) render the whole series natively from one invite.
+
+**Manual steps**
+- `supabase db push` (apply migration 0005)

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowUpRight, ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, Repeat, Search, SlidersHorizontal, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -172,8 +172,22 @@ export function EventsBrowser({ events }: { events: EventRow[] }) {
                   className={`grid ${COLS} gap-6 items-baseline px-8 py-5 hover:bg-[var(--color-paper-white)] transition-colors`}
                 >
                   <div className="min-w-0">
-                    <div className="text-[16px] truncate lowercase font-medium">
-                      {highlight(e.summary, search)}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="text-[16px] truncate lowercase font-medium">
+                        {highlight(e.summary, search)}
+                      </div>
+                      {e.rrule && (
+                        <span
+                          className="shrink-0 inline-flex items-center gap-1 border border-[var(--color-electric-blue)] text-[var(--color-electric-blue)] px-1.5 py-0.5 text-[10px] tracking-[0.08em] uppercase"
+                          title={e.exdates && e.exdates.length > 0 ? `recurring · ${e.exdates.length} excluded` : 'recurring'}
+                        >
+                          <Repeat className="h-3 w-3" strokeWidth={2.25} />
+                          recurring
+                          {e.exdates && e.exdates.length > 0 && (
+                            <span className="tabular-nums">· {e.exdates.length}</span>
+                          )}
+                        </span>
+                      )}
                     </div>
                     {e.location && (
                       <div className="mt-1 text-[12px] text-[var(--color-gray-600)] truncate">

@@ -53,6 +53,8 @@ export interface Database {
           recipient_count: number;
           sent_count: number;
           failed_count: number;
+          rrule: string | null;
+          exdates: string[];
           created_at: string;
         };
         Insert: {
@@ -69,6 +71,8 @@ export interface Database {
           recipient_count?: number;
           sent_count?: number;
           failed_count?: number;
+          rrule?: string | null;
+          exdates?: string[];
           created_at?: string;
         };
         Update: {
@@ -85,6 +89,8 @@ export interface Database {
           recipient_count?: number;
           sent_count?: number;
           failed_count?: number;
+          rrule?: string | null;
+          exdates?: string[];
           created_at?: string;
         };
         Relationships: [];

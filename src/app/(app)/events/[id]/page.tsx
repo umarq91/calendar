@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { getEvent, listEventRecipients } from '@/data/events';
 import { ROUTES } from '@/constants/routes';
 import { Tag, Divider } from '@/components/editorial/primitives';
+import { Repeat } from 'lucide-react';
+import { rruleToHuman } from '@/lib/recurrence';
 
 export const metadata = { title: 'event — let’s calendar' };
 
@@ -39,6 +41,37 @@ export default async function EventDetailPage({
           value={`${event.sent_count} ok · ${event.failed_count} failed`}
         />
       </div>
+
+      {event.rrule && (
+        <div className="mt-10 border border-[var(--color-ink-black)] bg-[var(--color-pure-white)] px-6 py-5">
+          <div className="flex items-start gap-4">
+            <Repeat className="h-5 w-5 mt-0.5 text-[var(--color-electric-blue)]" />
+            <div className="min-w-0 flex-1">
+              <div className="editorial-meta">recurrence</div>
+              <div className="mt-1 text-[15px] font-medium lowercase">
+                {rruleToHuman(event.rrule, event.start_at)}
+              </div>
+              {event.exdates.length > 0 && (
+                <div className="mt-4">
+                  <div className="editorial-meta text-[var(--color-gray-600)]">
+                    excluded ({event.exdates.length})
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {event.exdates.map((iso) => (
+                      <span
+                        key={iso}
+                        className="editorial-tag border-[var(--color-electric-blue)] text-[var(--color-electric-blue)] line-through decoration-2"
+                      >
+                        {fmtDateTime(iso)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {(event.location || event.description) && (
         <div className="mt-10 space-y-4">

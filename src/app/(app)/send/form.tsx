@@ -12,7 +12,9 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tag } from '@/components/editorial/primitives';
 import { DateTimePicker } from '@/components/editorial/datetime-picker';
+import { RecurrenceInput } from '@/components/editorial/recurrence-input';
 import { parseRecipients } from '@/lib/recipients';
+import { NONE_RECURRENCE } from '@/lib/recurrence';
 import { parseCsvToRecipientLines } from '@/lib/csv';
 import { ROUTES } from '@/constants/routes';
 
@@ -68,6 +70,8 @@ export function SendInviteForm({
       location: '',
       start_local: defaultStart,
       end_local: defaultEnd,
+      recurrence: NONE_RECURRENCE,
+      exdates: [],
     },
   });
 
@@ -260,6 +264,30 @@ export function SendInviteForm({
                   </p>
                 )}
               </div>
+            )}
+          />
+          <Controller
+            control={control}
+            name="recurrence"
+            render={({ field: recField }) => (
+              <Controller
+                control={control}
+                name="exdates"
+                render={({ field: exField }) => (
+                  <RecurrenceInput
+                    value={{
+                      recurrence: recField.value ?? NONE_RECURRENCE,
+                      exdates: exField.value ?? [],
+                    }}
+                    onChange={(next) => {
+                      recField.onChange(next.recurrence);
+                      exField.onChange(next.exdates);
+                    }}
+                    startLocal={startLocal ?? ''}
+                    disabled={pending}
+                  />
+                )}
+              />
             )}
           />
         </div>

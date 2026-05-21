@@ -3,6 +3,18 @@ import { parseRecipients } from '@/lib/recipients';
 
 export const MAX_RECIPIENTS_PER_BATCH = 100;
 
+const WEEKDAY_CODES = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'] as const;
+
+export const recurrenceSchema = z.object({
+  freq: z.enum(['none', 'daily', 'weekly', 'monthly', 'yearly']),
+  interval: z.number().int().min(1).max(99),
+  byday: z.array(z.enum(WEEKDAY_CODES)),
+  monthlyMode: z.enum(['date', 'nth']),
+  endKind: z.enum(['never', 'count', 'until']),
+  count: z.number().int().min(1).max(999).optional(),
+  until: z.string().optional(),
+});
+
 export const sendInviteSchema = z
   .object({
     recipients_raw: z.string().min(1, 'At least one recipient is required'),
@@ -12,6 +24,9 @@ export const sendInviteSchema = z
     /** Local datetime strings from <input type="datetime-local"> — interpreted as user's local time. */
     start_local: z.string().min(1, 'Start time is required'),
     end_local: z.string().min(1, 'End time is required'),
+    recurrence: recurrenceSchema,
+    /** ISO instants (UTC) to skip from the recurrence series. */
+    exdates: z.array(z.string()),
   })
   .refine((v) => new Date(v.end_local) > new Date(v.start_local), {
     path: ['end_local'],

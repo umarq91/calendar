@@ -4,6 +4,7 @@ import nodemailer from 'nodemailer';
 import { createClient } from '@/lib/supabase/server';
 import { buildIcs } from '@/lib/ics';
 import { parseRecipients } from '@/lib/recipients';
+import { buildRrule } from '@/lib/recurrence';
 import { sendInviteSchema } from './schema';
 
 export type RecipientResult = {
@@ -77,6 +78,11 @@ export async function sendBulkInvite(raw: unknown): Promise<SendResult> {
   const startAt = new Date(input.start_local).toISOString();
   const endAt = new Date(input.end_local).toISOString();
 
+  const rrule = buildRrule(input.recurrence, input.start_local);
+  const exdatesIso = (input.exdates ?? []).filter(
+    (iso) => !Number.isNaN(new Date(iso).getTime()),
+  );
+
   const { data: eventRow, error: insertErr } = await supabase
     .from('events')
     .insert({
@@ -89,6 +95,8 @@ export async function sendBulkInvite(raw: unknown): Promise<SendResult> {
       start_at: startAt,
       end_at: endAt,
       recipient_count: recipients.length,
+      rrule,
+      exdates: exdatesIso,
     })
     .select('id')
     .single();
@@ -152,6 +160,8 @@ export async function sendBulkInvite(raw: unknown): Promise<SendResult> {
     location: input.location || undefined,
     organizer: { name: smtp.from_name, email: smtp.from_email },
     attendees: recipients.map((r) => ({ name: r.name, email: r.email })),
+    rrule,
+    exdates: exdatesIso,
   });
 
   const results: RecipientResult[] = [];
